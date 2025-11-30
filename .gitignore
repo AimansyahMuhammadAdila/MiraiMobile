@@ -1,0 +1,50 @@
+#--------------------------------------------------------------------
+# Environment Variables
+#--------------------------------------------------------------------
+.env
+.env.*
+!.env.example
+
+#--------------------------------------------------------------------
+# Vendor & Dependencies
+#--------------------------------------------------------------------
+/vendor
+/node_modules
+
+#--------------------------------------------------------------------
+# IDE & System
+#--------------------------------------------------------------------
+.idea
+.vscode
+.DS_Store
+Thumbs.db
+
+#--------------------------------------------------------------------
+# Writable Directories (Cache, Logs, Debugbar, etc.)
+#--------------------------------------------------------------------
+/writable/cache/*
+!/writable/cache/index.html
+!/writable/cache/.gitignore
+
+/writable/debugbar/*
+!/writable/debugbar/index.html
+!/writable/debugbar/.gitignore
+
+/writable/logs/*
+!/writable/logs/index.html
+!/writable/logs/.gitignore
+
+/writable/session/*
+!/writable/session/index.html
+!/writable/session/.gitignore
+
+/writable/uploads/*
+!/writable/uploads/index.html
+!/writable/uploads/.gitignore
+
+#--------------------------------------------------------------------
+# Testing
+#--------------------------------------------------------------------
+/tests/_support/_generated
+/build
+/phpunit.xml
