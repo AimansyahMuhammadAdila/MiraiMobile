@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:mirai_mobile/services/api_service.dart';
 import 'package:mirai_mobile/screens/admin/user_detail_screen.dart';
 import 'package:mirai_mobile/utils/constants.dart';
+import 'package:provider/provider.dart';
+import 'package:mirai_mobile/providers/auth_provider.dart';
 
 class UserManagementScreen extends StatefulWidget {
   const UserManagementScreen({super.key});
@@ -214,6 +216,7 @@ class _UserManagementScreenState extends State<UserManagementScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: AppConstants.backgroundDark,
       body: Padding(
         padding: const EdgeInsets.all(AppConstants.paddingLarge),
         child: Column(
@@ -223,7 +226,9 @@ class _UserManagementScreenState extends State<UserManagementScreen> {
               children: [
                 Text(
                   'User Management',
-                  style: Theme.of(context).textTheme.headlineSmall,
+                  style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
                 const Spacer(),
                 Expanded(
@@ -232,8 +237,11 @@ class _UserManagementScreenState extends State<UserManagementScreen> {
                     decoration: InputDecoration(
                       hintText: 'Cari user...',
                       prefixIcon: const Icon(Icons.search),
+                      filled: true,
+                      fillColor: Colors.grey[900],
                       border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(8),
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: BorderSide.none,
                       ),
                       contentPadding: const EdgeInsets.symmetric(
                         horizontal: 16,
@@ -243,15 +251,21 @@ class _UserManagementScreenState extends State<UserManagementScreen> {
                     onSubmitted: (_) => _loadUsers(),
                   ),
                 ),
-                const SizedBox(width: 8),
-                IconButton(
-                  onPressed: _loadUsers,
-                  icon: const Icon(Icons.refresh),
-                  tooltip: 'Refresh',
+                const SizedBox(width: 12),
+                Container(
+                  decoration: BoxDecoration(
+                    color: AppConstants.primaryPurple,
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: IconButton(
+                    onPressed: _loadUsers,
+                    icon: const Icon(Icons.refresh, color: Colors.white),
+                    tooltip: 'Refresh',
+                  ),
                 ),
               ],
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: 24),
 
             // User List
             Expanded(
@@ -276,139 +290,196 @@ class _UserManagementScreenState extends State<UserManagementScreen> {
                     )
                   : _users.isEmpty
                   ? const Center(child: Text('Tidak ada data user'))
-                  : Column(
-                      children: [
-                        Expanded(
-                          child: Card(
-                            child: ListView.separated(
-                              itemCount: _users.length,
-                              separatorBuilder: (context, index) =>
-                                  const Divider(height: 1),
-                              itemBuilder: (context, index) {
-                                final user = _users[index];
-                                return ListTile(
-                                  leading: CircleAvatar(
+                  : ListView.builder(
+                      itemCount: _users.length,
+                      itemBuilder: (context, index) {
+                        final user = _users[index];
+                        final currentUser = Provider.of<AuthProvider>(
+                          context,
+                          listen: false,
+                        ).user;
+                        final isCurrentUser =
+                            user['id'].toString() == currentUser?.id.toString();
+
+                        return Card(
+                          margin: const EdgeInsets.only(bottom: 12),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          elevation: 2,
+                          child: InkWell(
+                            borderRadius: BorderRadius.circular(12),
+                            onTap: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => UserDetailScreen(
+                                    userId: int.parse(user['id'].toString()),
+                                    userName: user['name'],
+                                  ),
+                                ),
+                              );
+                            },
+                            child: Padding(
+                              padding: const EdgeInsets.all(12.0),
+                              child: Row(
+                                children: [
+                                  CircleAvatar(
+                                    radius: 24,
                                     backgroundColor: user['role'] == 'admin'
                                         ? AppConstants.primaryPurple
-                                        : Colors.grey,
+                                        : Colors.grey[700],
                                     child: Text(
                                       user['name'][0].toUpperCase(),
                                       style: const TextStyle(
                                         color: Colors.white,
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: 18,
                                       ),
                                     ),
                                   ),
-                                  title: Text(user['name']),
-                                  subtitle: Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      Text(user['email']),
-                                      Text(
-                                        user['phone'] ?? '-',
-                                        style: Theme.of(
-                                          context,
-                                        ).textTheme.bodySmall,
-                                      ),
-                                    ],
-                                  ),
-                                  trailing: Row(
-                                    mainAxisSize: MainAxisSize.min,
-                                    children: [
-                                      Container(
-                                        padding: const EdgeInsets.symmetric(
-                                          horizontal: 8,
-                                          vertical: 4,
-                                        ),
-                                        decoration: BoxDecoration(
-                                          color: user['role'] == 'admin'
-                                              ? Colors.purple.withOpacity(0.1)
-                                              : Colors.blue.withOpacity(0.1),
-                                          borderRadius: BorderRadius.circular(
-                                            4,
-                                          ),
-                                        ),
-                                        child: Text(
-                                          user['role'].toUpperCase(),
-                                          style: TextStyle(
-                                            fontSize: 10,
-                                            fontWeight: FontWeight.bold,
-                                            color: user['role'] == 'admin'
-                                                ? Colors.purple
-                                                : Colors.blue,
-                                          ),
-                                        ),
-                                      ),
-                                      const SizedBox(width: 8),
-                                      IconButton(
-                                        icon: const Icon(
-                                          Icons.visibility,
-                                          color: Colors.green,
-                                        ),
-                                        onPressed: () {
-                                          Navigator.push(
-                                            context,
-                                            MaterialPageRoute(
-                                              builder: (context) =>
-                                                  UserDetailScreen(
-                                                    userId: int.parse(
-                                                      user['id'].toString(),
-                                                    ),
-                                                    userName: user['name'],
+                                  const SizedBox(width: 16),
+                                  Expanded(
+                                    child: Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        Row(
+                                          children: [
+                                            Text(
+                                              user['name'],
+                                              style: Theme.of(context)
+                                                  .textTheme
+                                                  .titleMedium
+                                                  ?.copyWith(
+                                                    fontWeight: FontWeight.bold,
                                                   ),
                                             ),
-                                          );
-                                        },
-                                      ),
-                                      IconButton(
-                                        icon: const Icon(
-                                          Icons.edit,
-                                          color: Colors.blue,
+                                            const SizedBox(width: 8),
+                                            Container(
+                                              padding:
+                                                  const EdgeInsets.symmetric(
+                                                    horizontal: 8,
+                                                    vertical: 2,
+                                                  ),
+                                              decoration: BoxDecoration(
+                                                color: user['role'] == 'admin'
+                                                    ? Colors.purple.withOpacity(
+                                                        0.2,
+                                                      )
+                                                    : Colors.blue.withOpacity(
+                                                        0.2,
+                                                      ),
+                                                borderRadius:
+                                                    BorderRadius.circular(4),
+                                              ),
+                                              child: Text(
+                                                user['role'].toUpperCase(),
+                                                style: TextStyle(
+                                                  fontSize: 10,
+                                                  fontWeight: FontWeight.bold,
+                                                  color: user['role'] == 'admin'
+                                                      ? Colors.purple
+                                                      : Colors.blue,
+                                                ),
+                                              ),
+                                            ),
+                                          ],
                                         ),
-                                        onPressed: () => _showEditDialog(user),
-                                      ),
-                                      IconButton(
-                                        icon: const Icon(
-                                          Icons.delete,
-                                          color: Colors.red,
+                                        const SizedBox(height: 4),
+                                        Text(
+                                          user['email'],
+                                          style: Theme.of(context)
+                                              .textTheme
+                                              .bodyMedium
+                                              ?.copyWith(color: Colors.grey),
                                         ),
-                                        onPressed: () => _deleteUser(
+                                        if (user['phone'] != null &&
+                                            user['phone'].isNotEmpty)
+                                          Text(
+                                            user['phone'],
+                                            style: Theme.of(context)
+                                                .textTheme
+                                                .bodySmall
+                                                ?.copyWith(color: Colors.grey),
+                                          ),
+                                      ],
+                                    ),
+                                  ),
+                                  PopupMenuButton<String>(
+                                    onSelected: (value) {
+                                      if (value == 'edit') {
+                                        _showEditDialog(user);
+                                      } else if (value == 'delete') {
+                                        _deleteUser(
                                           int.parse(user['id'].toString()),
                                           user['name'],
-                                        ),
-                                      ),
-                                    ],
+                                        );
+                                      }
+                                    },
+                                    itemBuilder: (BuildContext context) =>
+                                        <PopupMenuEntry<String>>[
+                                          const PopupMenuItem<String>(
+                                            value: 'edit',
+                                            child: Row(
+                                              children: [
+                                                Icon(
+                                                  Icons.edit,
+                                                  color: Colors.blue,
+                                                  size: 20,
+                                                ),
+                                                SizedBox(width: 8),
+                                                Text('Edit'),
+                                              ],
+                                            ),
+                                          ),
+                                          if (!isCurrentUser)
+                                            const PopupMenuItem<String>(
+                                              value: 'delete',
+                                              child: Row(
+                                                children: [
+                                                  Icon(
+                                                    Icons.delete,
+                                                    color: Colors.red,
+                                                    size: 20,
+                                                  ),
+                                                  SizedBox(width: 8),
+                                                  Text('Hapus'),
+                                                ],
+                                              ),
+                                            ),
+                                        ],
                                   ),
-                                );
-                              },
+                                ],
+                              ),
                             ),
                           ),
-                        ),
-                        if (_totalPages > 1)
-                          Padding(
-                            padding: const EdgeInsets.only(top: 16),
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                IconButton(
-                                  onPressed: _currentPage > 1
-                                      ? () => _loadUsers(page: _currentPage - 1)
-                                      : null,
-                                  icon: const Icon(Icons.chevron_left),
-                                ),
-                                Text('Page $_currentPage of $_totalPages'),
-                                IconButton(
-                                  onPressed: _currentPage < _totalPages
-                                      ? () => _loadUsers(page: _currentPage + 1)
-                                      : null,
-                                  icon: const Icon(Icons.chevron_right),
-                                ),
-                              ],
-                            ),
-                          ),
-                      ],
+                        );
+                      },
                     ),
             ),
+            if (_totalPages > 1)
+              Padding(
+                padding: const EdgeInsets.only(top: 16),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    IconButton(
+                      onPressed: _currentPage > 1
+                          ? () => _loadUsers(page: _currentPage - 1)
+                          : null,
+                      icon: const Icon(Icons.chevron_left),
+                    ),
+                    Text('Page $_currentPage of $_totalPages'),
+                    IconButton(
+                      onPressed: _currentPage < _totalPages
+                          ? () => _loadUsers(page: _currentPage + 1)
+                          : null,
+                      icon: const Icon(Icons.chevron_right),
+                    ),
+                  ],
+                ),
+              ),
           ],
         ),
       ),
