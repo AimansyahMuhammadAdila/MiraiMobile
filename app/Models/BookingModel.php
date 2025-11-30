@@ -19,6 +19,7 @@ class BookingModel extends Model
         'total_price',
         'qr_code',
         'booking_code',
+        'payment_proof',
         'payment_status'
     ];
 
@@ -66,7 +67,7 @@ class BookingModel extends Model
     /**
      * Get booking detail with full information
      */
-    public function getBookingDetail(int $bookingId, int $userId = null)
+    public function getBookingDetail(int $bookingId, ?int $userId = null)
     {
         $builder = $this->select('bookings.*, ticket_types.name as ticket_name, ticket_types.description as ticket_description, users.name as user_name, users.email as user_email')
             ->join('ticket_types', 'ticket_types.id = bookings.ticket_type_id')

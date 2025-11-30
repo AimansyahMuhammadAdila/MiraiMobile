@@ -2,42 +2,53 @@ class BookingModel {
   final int id;
   final int userId;
   final int ticketTypeId;
+  final String? ticketTypeName;
   final int quantity;
   final double totalPrice;
-  final String qrCode;
-  final String bookingCode;
+  final String? qrCode;
+  final String? bookingCode;
+  final String? paymentProof;
   final String paymentStatus;
-  final String? ticketName;
-  final String? ticketDescription;
   final String? createdAt;
+  final String? updatedAt;
 
   BookingModel({
     required this.id,
     required this.userId,
     required this.ticketTypeId,
+    this.ticketTypeName,
     required this.quantity,
     required this.totalPrice,
-    required this.qrCode,
-    required this.bookingCode,
+    this.qrCode,
+    this.bookingCode,
+    this.paymentProof,
     required this.paymentStatus,
-    this.ticketName,
-    this.ticketDescription,
     this.createdAt,
+    this.updatedAt,
   });
 
   factory BookingModel.fromJson(Map<String, dynamic> json) {
     return BookingModel(
-      id: json['id'] ?? 0,
-      userId: json['user_id'] ?? 0,
-      ticketTypeId: json['ticket_type_id'] ?? 0,
-      quantity: json['quantity'] ?? 0,
-      totalPrice: double.tryParse(json['total_price'].toString()) ?? 0.0,
-      qrCode: json['qr_code'] ?? '',
-      bookingCode: json['booking_code'] ?? '',
-      paymentStatus: json['payment_status'] ?? 'pending',
-      ticketName: json['ticket_name'],
-      ticketDescription: json['ticket_description'],
-      createdAt: json['created_at'],
+      id: json['id'] is String ? int.parse(json['id']) : json['id'] as int,
+      userId: json['user_id'] is String
+          ? int.parse(json['user_id'])
+          : json['user_id'] as int,
+      ticketTypeId: json['ticket_type_id'] is String
+          ? int.parse(json['ticket_type_id'])
+          : json['ticket_type_id'] as int,
+      ticketTypeName: json['ticket_type_name'] as String?,
+      quantity: json['quantity'] is String
+          ? int.parse(json['quantity'])
+          : json['quantity'] as int,
+      totalPrice: json['total_price'] is String
+          ? double.parse(json['total_price'])
+          : (json['total_price'] as num).toDouble(),
+      qrCode: json['qr_code'] as String?,
+      bookingCode: json['booking_code'] as String?,
+      paymentProof: json['payment_proof'] as String?,
+      paymentStatus: json['payment_status'] as String? ?? 'pending',
+      createdAt: json['created_at'] as String?,
+      updatedAt: json['updated_at'] as String?,
     );
   }
 
@@ -46,14 +57,15 @@ class BookingModel {
       'id': id,
       'user_id': userId,
       'ticket_type_id': ticketTypeId,
+      'ticket_type_name': ticketTypeName,
       'quantity': quantity,
       'total_price': totalPrice,
       'qr_code': qrCode,
       'booking_code': bookingCode,
+      'payment_proof': paymentProof,
       'payment_status': paymentStatus,
-      'ticket_name': ticketName,
-      'ticket_description': ticketDescription,
       'created_at': createdAt,
+      'updated_at': updatedAt,
     };
   }
 

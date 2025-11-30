@@ -146,7 +146,6 @@ class DashboardHomeScreen extends StatelessWidget {
                             Text(
                               DateFormat(
                                 'd MMMM yyyy',
-                                'id_ID',
                               ).format(AppConstants.eventDate),
                               style: Theme.of(context).textTheme.titleMedium
                                   ?.copyWith(color: Colors.white),

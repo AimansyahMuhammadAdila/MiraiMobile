@@ -3,23 +3,31 @@ class UserModel {
   final String name;
   final String email;
   final String? phone;
-  final String? createdAt;
+  final String role; // 'user' or 'admin'
 
   UserModel({
     required this.id,
     required this.name,
     required this.email,
     this.phone,
-    this.createdAt,
+    this.role = 'user',
   });
 
   factory UserModel.fromJson(Map<String, dynamic> json) {
+    // Handle both String and int for id
+    int userId;
+    if (json['id'] is String) {
+      userId = int.parse(json['id']);
+    } else {
+      userId = json['id'] as int;
+    }
+
     return UserModel(
-      id: json['id'] ?? 0,
-      name: json['name'] ?? '',
-      email: json['email'] ?? '',
-      phone: json['phone'],
-      createdAt: json['created_at'],
+      id: userId,
+      name: json['name'] as String,
+      email: json['email'] as String,
+      phone: json['phone'] as String?,
+      role: json['role'] as String? ?? 'user',
     );
   }
 
@@ -29,7 +37,13 @@ class UserModel {
       'name': name,
       'email': email,
       'phone': phone,
-      'created_at': createdAt,
+      'role': role,
     };
   }
+
+  // Check if user is admin
+  bool get isAdmin => role == 'admin';
+
+  // Check if user is regular user
+  bool get isUser => role == 'user';
 }

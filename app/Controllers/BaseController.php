@@ -53,6 +53,19 @@ abstract class BaseController extends Controller
 
         // Preload any models, libraries, etc, here.
 
-        // E.g.: $this->session = service('session');
+        // E.g.: $this->session = \Config\Services::session();
+
+        // Add CORS Headers to all responses
+        $this->response->setHeader('Access-Control-Allow-Origin', '*');
+        $this->response->setHeader('Access-Control-Allow-Headers', 'X-Requested-With, Content-Type, Accept, Origin, Authorization');
+        $this->response->setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+        $this->response->setHeader('Access-Control-Max-Age', '86400');
+
+        // Handle OPTIONS preflight request
+        if ($this->request->getMethod() === 'options') {
+            $this->response->setStatusCode(200);
+            $this->response->send();
+            exit;
+        }
     }
 }

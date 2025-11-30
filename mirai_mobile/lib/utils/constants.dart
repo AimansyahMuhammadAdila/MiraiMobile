@@ -3,8 +3,7 @@ import 'package:flutter/material.dart';
 // API Base URL Configuration
 class AppConstants {
   // API Configuration
-  static const String apiBaseUrl = 'http://localhost/MiraiMobile/api/v1';
-
+ static const String apiBaseUrl = 'http://localhost:8080/api/v1';
   // Storage Keys
   static const String tokenKey = 'auth_token';
   static const String userKey = 'user_data';

@@ -44,6 +44,11 @@ class CreateBookingsTable extends Migration
                 'constraint' => '20',
                 'unique' => true,
             ],
+            'payment_proof' => [
+                'type' => 'VARCHAR',
+                'constraint' => '255',
+                'null' => true,
+            ],
             'payment_status' => [
                 'type' => 'ENUM',
                 'constraint' => ['pending', 'confirmed', 'cancelled'],

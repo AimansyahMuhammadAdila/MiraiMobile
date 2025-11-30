@@ -117,6 +117,17 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   label: 'Nomor Telepon (Opsional)',
                   keyboardType: TextInputType.phone,
                   prefixIcon: Icons.phone_outlined,
+                  validator: (value) {
+                    if (value != null && value.isNotEmpty) {
+                      if (value.length < 10) {
+                        return 'Nomor telepon minimal 10 digit';
+                      }
+                      if (value.length > 20) {
+                        return 'Nomor telepon maksimal 20 digit';
+                      }
+                    }
+                    return null;
+                  },
                 ),
                 const SizedBox(height: 16),
 

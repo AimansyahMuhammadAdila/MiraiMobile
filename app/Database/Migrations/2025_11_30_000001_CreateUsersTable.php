@@ -24,6 +24,11 @@ class CreateUsersTable extends Migration
                 'constraint' => '255',
                 'unique' => true,
             ],
+            'role' => [
+                'type' => 'ENUM',
+                'constraint' => ['user', 'admin'],
+                'default' => 'user',
+            ],
             'phone' => [
                 'type' => 'VARCHAR',
                 'constraint' => '20',

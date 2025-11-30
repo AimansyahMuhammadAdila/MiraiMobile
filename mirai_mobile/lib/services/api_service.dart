@@ -1,4 +1,8 @@
 import 'package:dio/dio.dart';
+import 'package:path/path.dart' show basename;
+import 'package:image_picker/image_picker.dart';
+import 'package:flutter/foundation.dart' show kIsWeb;
+import 'package:mirai_mobile/models/api_response.dart';
 import 'package:mirai_mobile/models/auth_response_model.dart';
 import 'package:mirai_mobile/models/booking_model.dart';
 import 'package:mirai_mobile/models/ticket_type_model.dart';
@@ -207,6 +211,158 @@ class ApiService {
       }
 
       throw Exception(response.data['message'] ?? 'Failed to update profile');
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  // ============================================
+  // ADMIN API ENDPOINTS
+  // ============================================
+
+  Future<ApiResponse> getPendingBookings() async {
+    try {
+      final response = await _dio.get('/admin/bookings/pending');
+      return ApiResponse.fromJson(response.data);
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  Future<ApiResponse> approveBooking(int bookingId) async {
+    try {
+      final response = await _dio.post('/admin/bookings/$bookingId/approve');
+      return ApiResponse.fromJson(response.data);
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  Future<ApiResponse> rejectBooking(int bookingId, {String? reason}) async {
+    try {
+      final response = await _dio.post(
+        '/admin/bookings/$bookingId/reject',
+        data: {'reason': reason},
+      );
+      return ApiResponse.fromJson(response.data);
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  Future<ApiResponse> getDashboardStats() async {
+    try {
+      final response = await _dio.get('/admin/dashboard/stats');
+      return ApiResponse.fromJson(response.data);
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  Future<ApiResponse> uploadPaymentProof({
+    required int bookingId,
+    required XFile imageFile,
+  }) async {
+    try {
+      MultipartFile multipartFile;
+
+      if (kIsWeb) {
+        // Web: Use bytes
+        final bytes = await imageFile.readAsBytes();
+        multipartFile = MultipartFile.fromBytes(
+          bytes,
+          filename: imageFile.name,
+        );
+      } else {
+        // Mobile: Use path
+        multipartFile = await MultipartFile.fromFile(
+          imageFile.path,
+          filename: basename(imageFile.path),
+        );
+      }
+
+      final formData = FormData.fromMap({'payment_proof': multipartFile});
+
+      final response = await _dio.post(
+        '/bookings/$bookingId/upload-proof',
+        data: formData,
+      );
+
+      return ApiResponse.fromJson(response.data);
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  // Ticket Management (Admin)
+
+  Future<bool> createTicketType(Map<String, dynamic> data) async {
+    try {
+      final response = await _dio.post('/admin/tickets', data: data);
+      return response.statusCode == 201;
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  Future<bool> updateTicketType(int id, Map<String, dynamic> data) async {
+    try {
+      final response = await _dio.put('/admin/tickets/$id', data: data);
+      return response.statusCode == 200;
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  Future<bool> deleteTicketType(int id) async {
+    try {
+      final response = await _dio.delete('/admin/tickets/$id');
+      return response.statusCode == 200;
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  // User Management (Admin)
+
+  Future<ApiResponse> getUserDetail(int id) async {
+    try {
+      final response = await _dio.get('/admin/users/$id');
+      return ApiResponse.fromJson(response.data);
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  Future<ApiResponse> getUsers({
+    int page = 1,
+    int perPage = 20,
+    String search = '',
+  }) async {
+    try {
+      final response = await _dio.get(
+        '/admin/users',
+        queryParameters: {'page': page, 'per_page': perPage, 'search': search},
+      );
+      return ApiResponse.fromJson(response.data);
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  Future<ApiResponse> updateUser(int id, Map<String, dynamic> userData) async {
+    try {
+      final response = await _dio.put('/admin/users/$id', data: userData);
+      return ApiResponse.fromJson(response.data);
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  Future<ApiResponse> deleteUser(int id) async {
+    try {
+      final response = await _dio.delete('/admin/users/$id');
+      return ApiResponse.fromJson(response.data);
     } catch (e) {
       rethrow;
     }

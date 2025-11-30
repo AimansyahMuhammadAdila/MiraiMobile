@@ -12,7 +12,7 @@ class UserModel extends Model
     protected $returnType = 'array';
     protected $useSoftDeletes = false;
     protected $protectFields = true;
-    protected $allowedFields = ['name', 'email', 'phone', 'password', 'jwt_token'];
+    protected $allowedFields = ['name', 'email', 'phone', 'password', 'jwt_token', 'role'];
 
     // Dates
     protected $useTimestamps = true;
@@ -101,5 +101,23 @@ class UserModel extends Model
     public function getUserByToken(string $token)
     {
         return $this->where('jwt_token', $token)->first();
+    }
+
+    /**
+     * Check if user is admin
+     */
+    public function isAdmin(int $userId): bool
+    {
+        $user = $this->find($userId);
+        return $user && isset($user['role']) && $user['role'] === 'admin';
+    }
+
+    /**
+     * Check if user is regular user
+     */
+    public function isUser(int $userId): bool
+    {
+        $user = $this->find($userId);
+        return $user && isset($user['role']) && $user['role'] === 'user';
     }
 }

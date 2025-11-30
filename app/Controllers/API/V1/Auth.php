@@ -21,11 +21,21 @@ class Auth extends BaseController
      */
     public function register()
     {
+        // Get JSON input
+        $json = $this->request->getJSON();
+
         $rules = [
             'name' => 'required|min_length[3]|max_length[255]',
             'email' => 'required|valid_email|is_unique[users.email]',
             'phone' => 'permit_empty|min_length[10]|max_length[20]',
             'password' => 'required|min_length[6]',
+        ];
+
+        $inputData = [
+            'name' => $json->name ?? null,
+            'email' => $json->email ?? null,
+            'phone' => $json->phone ?? null,
+            'password' => $json->password ?? null,
         ];
 
         if (!$this->validate($rules)) {
@@ -37,10 +47,11 @@ class Auth extends BaseController
         }
 
         $data = [
-            'name' => $this->request->getPost('name'),
-            'email' => $this->request->getPost('email'),
-            'phone' => $this->request->getPost('phone'),
-            'password' => $this->request->getPost('password'),
+            'name' => $json->name,
+            'email' => $json->email,
+            'phone' => $json->phone ?? null,
+            'password' => $json->password,
+            'role' => 'user', // Default role for new users
         ];
 
         try {
@@ -53,6 +64,7 @@ class Auth extends BaseController
             // Get user data without password
             $user = $this->userModel->find($userId);
             unset($user['password']);
+            unset($user['jwt_token']);
 
             return $this->response->setJSON([
                 'success' => true,
@@ -75,6 +87,9 @@ class Auth extends BaseController
      */
     public function login()
     {
+        // Get JSON input
+        $json = $this->request->getJSON();
+
         $rules = [
             'email' => 'required|valid_email',
             'password' => 'required',
@@ -88,8 +103,8 @@ class Auth extends BaseController
             ])->setStatusCode(400);
         }
 
-        $email = $this->request->getPost('email');
-        $password = $this->request->getPost('password');
+        $email = $json->email;
+        $password = $json->password;
 
         // Verify credentials
         $user = $this->userModel->verifyLogin($email, $password);
@@ -113,15 +128,18 @@ class Auth extends BaseController
         // Save token to database
         $this->userModel->updateToken($user['id'], $token);
 
-        // Remove password from response
-        unset($user['password']);
-        unset($user['jwt_token']);
-
+        // Prepare clean user response
         return $this->response->setJSON([
             'success' => true,
             'message' => 'Login berhasil',
             'data' => [
-                'user' => $user,
+                'user' => [
+                    'id' => $user['id'],
+                    'name' => $user['name'],
+                    'email' => $user['email'],
+                    'phone' => $user['phone'],
+                    'role' => $user['role'] ?? 'user',
+                ],
                 'token' => $token,
             ],
         ])->setStatusCode(200);

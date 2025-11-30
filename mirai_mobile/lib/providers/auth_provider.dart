@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:dio/dio.dart';
 import 'package:mirai_mobile/models/user_model.dart';
 import 'package:mirai_mobile/services/api_service.dart';
 import 'package:mirai_mobile/services/storage_service.dart';
@@ -55,7 +56,18 @@ class AuthProvider with ChangeNotifier {
       }
     } catch (e) {
       _isLoading = false;
-      _error = 'Gagal mendaftar: ${e.toString()}';
+      if (e is DioException && e.response != null) {
+        final data = e.response?.data;
+        if (data is Map<String, dynamic>) {
+          _error = data['message'] ?? 'Terjadi kesalahan pada server';
+          // If there are validation errors in 'data', we could append them
+          // but for now just showing the main message is better than the exception
+        } else {
+          _error = 'Terjadi kesalahan: ${e.message}';
+        }
+      } else {
+        _error = 'Gagal mendaftar: ${e.toString()}';
+      }
       notifyListeners();
       return false;
     }
@@ -91,7 +103,16 @@ class AuthProvider with ChangeNotifier {
       }
     } catch (e) {
       _isLoading = false;
-      _error = 'Gagal login: ${e.toString()}';
+      if (e is DioException && e.response != null) {
+        final data = e.response?.data;
+        if (data is Map<String, dynamic>) {
+          _error = data['message'] ?? 'Terjadi kesalahan pada server';
+        } else {
+          _error = 'Terjadi kesalahan: ${e.message}';
+        }
+      } else {
+        _error = 'Gagal login: ${e.toString()}';
+      }
       notifyListeners();
       return false;
     }

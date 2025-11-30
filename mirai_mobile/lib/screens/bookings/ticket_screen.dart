@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:qr_flutter/qr_flutter.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:mirai_mobile/models/booking_model.dart';
 import 'package:mirai_mobile/utils/constants.dart';
 
@@ -39,31 +39,96 @@ class TicketScreen extends StatelessWidget {
                     ),
                     const SizedBox(height: 24),
 
-                    // QR Code
-                    Container(
-                      padding: const EdgeInsets.all(16),
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(
-                          AppConstants.radiusMedium,
+                    // QR Code or Bank Info
+                    if (booking.isConfirmed && booking.qrCode != null) ...[
+                      Container(
+                        padding: const EdgeInsets.all(16),
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(
+                            AppConstants.radiusMedium,
+                          ),
+                        ),
+                        child: CachedNetworkImage(
+                          imageUrl:
+                              '${AppConstants.apiBaseUrl}/media/qr_codes/${booking.qrCode!.split('/').last}',
+                          width: 250,
+                          height: 250,
+                          placeholder: (context, url) => const SizedBox(
+                            width: 250,
+                            height: 250,
+                            child: Center(child: CircularProgressIndicator()),
+                          ),
+                          errorWidget: (context, url, error) => const SizedBox(
+                            width: 250,
+                            height: 250,
+                            child: Icon(Icons.error, size: 60),
+                          ),
                         ),
                       ),
-                      child: QrImageView(
-                        data: booking.qrCode,
-                        version: QrVersions.auto,
-                        size: 250.0,
+                      const SizedBox(height: 16),
+                      Text(
+                        'Scan QR Code ini di pintu masuk',
+                        style: Theme.of(
+                          context,
+                        ).textTheme.bodySmall?.copyWith(color: Colors.white70),
+                        textAlign: TextAlign.center,
                       ),
-                    ),
-                    const SizedBox(height: 16),
-
-                    Text(
-                      booking.qrCode,
-                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: Colors.white70,
-                        fontFamily: 'monospace',
+                    ] else if (booking.isPending) ...[
+                      Container(
+                        padding: const EdgeInsets.all(16),
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(
+                            AppConstants.radiusMedium,
+                          ),
+                        ),
+                        child: Column(
+                          children: [
+                            const Icon(
+                              Icons.account_balance,
+                              size: 48,
+                              color: AppConstants.primaryPurple,
+                            ),
+                            const SizedBox(height: 16),
+                            Text(
+                              'Silakan Transfer ke:',
+                              style: Theme.of(context).textTheme.bodyMedium,
+                            ),
+                            const SizedBox(height: 8),
+                            Text(
+                              'BCA 1234567890',
+                              style: Theme.of(context).textTheme.headlineSmall
+                                  ?.copyWith(
+                                    color: AppConstants.primaryPurple,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                            ),
+                            const SizedBox(height: 4),
+                            Text(
+                              'a.n. PT Mirai Mobile',
+                              style: Theme.of(context).textTheme.titleMedium,
+                            ),
+                            const SizedBox(height: 16),
+                            const Divider(),
+                            const SizedBox(height: 8),
+                            Text(
+                              'Total Pembayaran:',
+                              style: Theme.of(context).textTheme.bodyMedium,
+                            ),
+                            const SizedBox(height: 4),
+                            Text(
+                              booking.formattedPrice,
+                              style: Theme.of(context).textTheme.headlineSmall
+                                  ?.copyWith(
+                                    color: Colors.orange,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                            ),
+                          ],
+                        ),
                       ),
-                      textAlign: TextAlign.center,
-                    ),
+                    ],
                   ],
                 ),
               ),
@@ -85,11 +150,11 @@ class TicketScreen extends StatelessWidget {
 
                     _DetailRow(
                       label: 'Booking Code',
-                      value: booking.bookingCode,
+                      value: booking.bookingCode ?? 'N/A',
                     ),
                     _DetailRow(
                       label: 'Jenis Tiket',
-                      value: booking.ticketName ?? '-',
+                      value: booking.ticketTypeName ?? '-',
                     ),
                     _DetailRow(
                       label: 'Jumlah',

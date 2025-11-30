@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:mirai_mobile/providers/auth_provider.dart';
 import 'package:mirai_mobile/screens/auth/register_screen.dart';
 import 'package:mirai_mobile/screens/dashboard/dashboard_screen.dart';
+import 'package:mirai_mobile/screens/admin/admin_dashboard_screen.dart';
 import 'package:mirai_mobile/utils/constants.dart';
 import 'package:mirai_mobile/widgets/custom_button.dart';
 import 'package:mirai_mobile/widgets/custom_text_field.dart';
@@ -36,9 +37,19 @@ class _LoginScreenState extends State<LoginScreen> {
     );
 
     if (success && mounted) {
-      Navigator.of(context).pushReplacement(
-        MaterialPageRoute(builder: (_) => const DashboardScreen()),
-      );
+      // Check if user is admin
+      final user = authProvider.user;
+      if (user != null && user.isAdmin) {
+        // Redirect to admin dashboard
+        Navigator.of(context).pushReplacement(
+          MaterialPageRoute(builder: (_) => const AdminDashboardScreen()),
+        );
+      } else {
+        // Redirect to regular user dashboard
+        Navigator.of(context).pushReplacement(
+          MaterialPageRoute(builder: (_) => const DashboardScreen()),
+        );
+      }
     } else if (authProvider.error != null && mounted) {
       ScaffoldMessenger.of(
         context,

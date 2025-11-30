@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:mirai_mobile/providers/booking_provider.dart';
 import 'package:mirai_mobile/screens/bookings/ticket_screen.dart';
+import 'package:mirai_mobile/screens/bookings/payment_proof_upload_screen.dart';
+import 'package:mirai_mobile/screens/bookings/ticket_qr_screen.dart';
 import 'package:mirai_mobile/utils/constants.dart';
 
 class BookingHistoryScreen extends StatefulWidget {
@@ -114,11 +116,15 @@ class _BookingHistoryScreenState extends State<BookingHistoryScreen> {
                           Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
-                              Text(
-                                booking.bookingCode,
-                                style: Theme.of(context).textTheme.titleMedium
-                                    ?.copyWith(fontWeight: FontWeight.bold),
+                              Expanded(
+                                child: Text(
+                                  booking.bookingCode ?? 'N/A',
+                                  style: Theme.of(context).textTheme.titleMedium
+                                      ?.copyWith(fontWeight: FontWeight.bold),
+                                  overflow: TextOverflow.ellipsis,
+                                ),
                               ),
+                              const SizedBox(width: 8),
                               _StatusBadge(status: booking.paymentStatus),
                             ],
                           ),
@@ -126,7 +132,7 @@ class _BookingHistoryScreenState extends State<BookingHistoryScreen> {
 
                           // Ticket Info
                           Text(
-                            booking.ticketName ?? 'Tiket',
+                            booking.ticketTypeName ?? 'Tiket',
                             style: Theme.of(context).textTheme.titleLarge,
                           ),
                           const SizedBox(height: 8),
@@ -163,11 +169,64 @@ class _BookingHistoryScreenState extends State<BookingHistoryScreen> {
                           ),
                           const SizedBox(height: 12),
 
-                          // Action Button
-                          if (booking.isConfirmed)
-                            Align(
-                              alignment: Alignment.centerRight,
-                              child: TextButton.icon(
+                          // Action Buttons
+                          const SizedBox(height: 8),
+                          Wrap(
+                            spacing: 8,
+                            runSpacing: 8,
+                            alignment: WrapAlignment.end,
+                            children: [
+                              // Upload Payment Proof Button (only for pending without proof)
+                              if (booking.isPending &&
+                                  (booking.paymentProof == null ||
+                                      booking.paymentProof!.isEmpty))
+                                ElevatedButton.icon(
+                                  onPressed: () async {
+                                    final result = await Navigator.of(context)
+                                        .push(
+                                          MaterialPageRoute(
+                                            builder: (_) =>
+                                                PaymentProofUploadScreen(
+                                                  bookingId: booking.id,
+                                                  bookingCode:
+                                                      booking.bookingCode ??
+                                                      'N/A',
+                                                ),
+                                          ),
+                                        );
+                                    if (result == true && mounted) {
+                                      bookingProvider.fetchBookings();
+                                    }
+                                  },
+                                  icon: const Icon(Icons.upload_file, size: 18),
+                                  label: const Text('Upload Bukti'),
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor: Colors.orange,
+                                    foregroundColor: Colors.white,
+                                  ),
+                                ),
+                              // View QR Code Button (only for confirmed with QR)
+                              if (booking.isConfirmed &&
+                                  booking.qrCode != null &&
+                                  booking.qrCode!.isNotEmpty)
+                                ElevatedButton.icon(
+                                  onPressed: () {
+                                    Navigator.of(context).push(
+                                      MaterialPageRoute(
+                                        builder: (_) =>
+                                            TicketQRScreen(booking: booking),
+                                      ),
+                                    );
+                                  },
+                                  icon: const Icon(Icons.qr_code_2, size: 18),
+                                  label: const Text('Lihat Tiket'),
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor: Colors.green,
+                                    foregroundColor: Colors.white,
+                                  ),
+                                ),
+                              // View Details Button (always visible)
+                              TextButton.icon(
                                 onPressed: () {
                                   Navigator.of(context).push(
                                     MaterialPageRoute(
@@ -176,10 +235,11 @@ class _BookingHistoryScreenState extends State<BookingHistoryScreen> {
                                     ),
                                   );
                                 },
-                                icon: const Icon(Icons.qr_code_2, size: 20),
-                                label: const Text('Lihat E-Ticket'),
+                                icon: const Icon(Icons.info_outline, size: 18),
+                                label: const Text('Detail'),
                               ),
-                            ),
+                            ],
+                          ),
                         ],
                       ),
                     ),

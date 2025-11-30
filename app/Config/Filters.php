@@ -3,7 +3,7 @@
 namespace Config;
 
 use CodeIgniter\Config\Filters as BaseFilters;
-use CodeIgniter\Filters\Cors;
+use App\Filters\Cors;
 use CodeIgniter\Filters\CSRF;
 use CodeIgniter\Filters\DebugToolbar;
 use CodeIgniter\Filters\ForceHTTPS;
@@ -30,11 +30,12 @@ class Filters extends BaseFilters
         'honeypot' => Honeypot::class,
         'invalidchars' => InvalidChars::class,
         'secureheaders' => SecureHeaders::class,
-        'cors' => Cors::class,
+        'auth' => \App\Filters\AuthFilter::class,
+        'admin' => \App\Filters\AdminFilter::class,
+        'cors' => \App\Filters\Cors::class,
         'forcehttps' => ForceHTTPS::class,
         'pagecache' => PageCache::class,
         'performance' => PerformanceMetrics::class,
-        'auth' => \App\Filters\AuthFilter::class,
     ];
 
     /**
@@ -73,6 +74,7 @@ class Filters extends BaseFilters
      */
     public array $globals = [
         'before' => [
+            'cors', // Enable CORS for Flutter Web
             // 'honeypot',
             // 'csrf',
             // 'invalidchars',

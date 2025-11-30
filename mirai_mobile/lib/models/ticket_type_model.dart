@@ -5,8 +5,8 @@ class TicketTypeModel {
   final double price;
   final int quota;
   final int remainingQuota;
-  final bool isAvailable;
-  final int sold;
+  final String? createdAt;
+  final String? updatedAt;
 
   TicketTypeModel({
     required this.id,
@@ -15,20 +15,26 @@ class TicketTypeModel {
     required this.price,
     required this.quota,
     required this.remainingQuota,
-    required this.isAvailable,
-    required this.sold,
+    this.createdAt,
+    this.updatedAt,
   });
 
   factory TicketTypeModel.fromJson(Map<String, dynamic> json) {
     return TicketTypeModel(
-      id: json['id'] ?? 0,
-      name: json['name'] ?? '',
-      description: json['description'],
-      price: double.tryParse(json['price'].toString()) ?? 0.0,
-      quota: json['quota'] ?? 0,
-      remainingQuota: json['remaining_quota'] ?? 0,
-      isAvailable: json['is_available'] ?? false,
-      sold: json['sold'] ?? 0,
+      id: json['id'] is String ? int.parse(json['id']) : json['id'] as int,
+      name: json['name'] as String,
+      description: json['description'] as String?,
+      price: json['price'] is String
+          ? double.parse(json['price'])
+          : (json['price'] as num).toDouble(),
+      quota: json['quota'] is String
+          ? int.parse(json['quota'])
+          : json['quota'] as int,
+      remainingQuota: json['remaining_quota'] is String
+          ? int.parse(json['remaining_quota'])
+          : json['remaining_quota'] as int,
+      createdAt: json['created_at'] as String?,
+      updatedAt: json['updated_at'] as String?,
     );
   }
 
@@ -40,10 +46,12 @@ class TicketTypeModel {
       'price': price,
       'quota': quota,
       'remaining_quota': remainingQuota,
-      'is_available': isAvailable,
-      'sold': sold,
+      'created_at': createdAt,
+      'updated_at': updatedAt,
     };
   }
+
+  bool get isAvailable => remainingQuota > 0;
 
   String get formattedPrice {
     return 'Rp ${price.toStringAsFixed(0).replaceAllMapped(RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'), (Match m) => '${m[1]}.')}';
