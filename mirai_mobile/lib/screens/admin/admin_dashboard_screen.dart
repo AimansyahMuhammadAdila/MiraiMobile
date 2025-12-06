@@ -92,6 +92,9 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
               setState(() {
                 _selectedIndex = index;
               });
+              if (index == 0) {
+                _loadStats();
+              }
             },
             labelType: NavigationRailLabelType.all,
             backgroundColor: AppConstants.backgroundDark,
@@ -149,94 +152,101 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
     if (_isLoading) {
       return const Center(child: CircularProgressIndicator());
     }
-    return SingleChildScrollView(
-      padding: const EdgeInsets.all(AppConstants.paddingLarge),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            'Dashboard Overview',
-            style: Theme.of(context).textTheme.headlineMedium,
-          ),
-          const SizedBox(height: 24),
+    return RefreshIndicator(
+      onRefresh: _loadStats,
+      child: SingleChildScrollView(
+        physics: const AlwaysScrollableScrollPhysics(),
+        padding: const EdgeInsets.all(AppConstants.paddingLarge),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'Dashboard Overview',
+              style: Theme.of(context).textTheme.headlineMedium,
+            ),
+            const SizedBox(height: 24),
 
-          // Statistics Cards
-          GridView.count(
-            crossAxisCount: 2,
-            shrinkWrap: true,
-            mainAxisSpacing: 16,
-            crossAxisSpacing: 16,
-            childAspectRatio:
-                1.5, // Made cards taller to prevent bottom overflow
-            physics: const NeverScrollableScrollPhysics(),
-            children: [
-              _buildStatCard(
-                'Total Bookings',
-                _stats['total_bookings'].toString(),
-                Icons.shopping_cart,
-                AppConstants.primaryPurple,
-              ),
-              _buildStatCard(
-                'Pending Payments',
-                _stats['pending_payments'].toString(),
-                Icons.pending_actions,
-                Colors.orange,
-              ),
-              _buildStatCard(
-                'Total Revenue',
-                _formatCurrency(_stats['total_revenue']),
-                Icons.attach_money,
-                Colors.green,
-              ),
-              _buildStatCard(
-                'Total Users',
-                _stats['total_users'].toString(),
-                Icons.people,
-                AppConstants.primaryCyan,
-              ),
-            ],
-          ),
+            // Statistics Cards
+            GridView.count(
+              crossAxisCount: 2,
+              shrinkWrap: true,
+              mainAxisSpacing: 16,
+              crossAxisSpacing: 16,
+              childAspectRatio:
+                  1.5, // Made cards taller to prevent bottom overflow
+              physics: const NeverScrollableScrollPhysics(),
+              children: [
+                _buildStatCard(
+                  'Total Bookings',
+                  _stats['total_bookings'].toString(),
+                  Icons.shopping_cart,
+                  AppConstants.primaryPurple,
+                ),
+                _buildStatCard(
+                  'Pending Payments',
+                  _stats['pending_payments'].toString(),
+                  Icons.pending_actions,
+                  Colors.orange,
+                ),
+                _buildStatCard(
+                  'Total Revenue',
+                  _formatCurrency(_stats['total_revenue']),
+                  Icons.attach_money,
+                  Colors.green,
+                ),
+                _buildStatCard(
+                  'Total Users',
+                  _stats['total_users'].toString(),
+                  Icons.people,
+                  AppConstants.primaryCyan,
+                ),
+              ],
+            ),
 
-          const SizedBox(height: 32),
+            const SizedBox(height: 32),
 
-          // Quick Actions
-          Text('Quick Actions', style: Theme.of(context).textTheme.titleLarge),
-          const SizedBox(height: 16),
+            // Quick Actions
+            Text(
+              'Quick Actions',
+              style: Theme.of(context).textTheme.titleLarge,
+            ),
+            const SizedBox(height: 16),
 
-          Wrap(
-            spacing: 12,
-            runSpacing: 12,
-            children: [
-              ElevatedButton.icon(
-                onPressed: () {
-                  setState(() {
-                    _selectedIndex = 1;
-                  });
-                },
-                icon: const Icon(Icons.payment),
-                label: const Text('Verify Payments'),
-              ),
-              ElevatedButton.icon(
-                onPressed: () {
-                  setState(() {
-                    _selectedIndex = 2;
-                  });
-                },
-                icon: const Icon(Icons.person_add),
-                label: const Text('Manage Users'),
-              ),
-              ElevatedButton.icon(
-                onPressed: () {
-                  setState(() {
-                    _selectedIndex = 3;
-                  });
-                },
-                icon: const Icon(Icons.add),
-                label: const Text('Add Ticket Type'),
-              ),
-            ],
-          ),
-        ],
+            Wrap(
+              spacing: 12,
+              runSpacing: 12,
+              children: [
+                ElevatedButton.icon(
+                  onPressed: () {
+                    setState(() {
+                      _selectedIndex = 1;
+                    });
+                  },
+                  icon: const Icon(Icons.payment),
+                  label: const Text('Verify Payments'),
+                ),
+                ElevatedButton.icon(
+                  onPressed: () {
+                    setState(() {
+                      _selectedIndex = 2;
+                    });
+                  },
+                  icon: const Icon(Icons.person_add),
+                  label: const Text('Manage Users'),
+                ),
+                ElevatedButton.icon(
+                  onPressed: () {
+                    setState(() {
+                      _selectedIndex = 3;
+                    });
+                  },
+                  icon: const Icon(Icons.add),
+                  label: const Text('Add Ticket Type'),
+                ),
+              ],
+            ),
+          ],
+        ),
       ),
     );
   }
