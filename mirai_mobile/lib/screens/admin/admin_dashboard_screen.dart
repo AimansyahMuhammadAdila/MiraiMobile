@@ -7,7 +7,9 @@ import 'package:provider/provider.dart';
 import 'package:mirai_mobile/screens/admin/payment_verification_screen.dart';
 import 'package:mirai_mobile/screens/admin/user_management_screen.dart';
 import 'package:mirai_mobile/screens/admin/ticket_management_screen.dart';
+import 'package:mirai_mobile/screens/admin/booking_history_screen.dart';
 import 'package:mirai_mobile/screens/auth/login_screen.dart';
+import 'package:mirai_mobile/widgets/theme_toggle_button.dart';
 
 class AdminDashboardScreen extends StatefulWidget {
   const AdminDashboardScreen({super.key});
@@ -69,6 +71,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
       appBar: AppBar(
         title: const Text('Admin Panel - MiraiFest'),
         actions: [
+          const ThemeToggleButton(),
           IconButton(
             icon: const Icon(Icons.logout),
             onPressed: () async {
@@ -86,43 +89,72 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
       body: Row(
         children: [
           // Sidebar Navigation
-          NavigationRail(
-            selectedIndex: _selectedIndex,
-            onDestinationSelected: (int index) {
-              setState(() {
-                _selectedIndex = index;
-              });
-              if (index == 0) {
-                _loadStats();
-              }
-            },
-            labelType: NavigationRailLabelType.all,
-            backgroundColor: AppConstants.backgroundDark,
-            selectedIconTheme: const IconThemeData(
-              color: AppConstants.primaryPurple,
+          Container(
+            decoration: BoxDecoration(
+              border: Border(
+                right: BorderSide(
+                  color: Theme.of(context).dividerColor,
+                  width: 1,
+                ),
+              ),
             ),
-            selectedLabelTextStyle: const TextStyle(
-              color: AppConstants.primaryPurple,
-              fontWeight: FontWeight.bold,
+            child: NavigationRail(
+              backgroundColor: Colors.transparent,
+              selectedIndex: _selectedIndex,
+              indicatorColor: AppConstants.accentGold.withOpacity(0.15),
+              selectedIconTheme: const IconThemeData(
+                color: AppConstants.accentGold,
+                size: 28,
+              ),
+              selectedLabelTextStyle: TextStyle(
+                color: Theme.of(context).textTheme.bodyLarge?.color,
+                fontWeight: FontWeight.bold,
+                fontSize: 13,
+              ),
+              unselectedIconTheme: IconThemeData(
+                color: Theme.of(
+                  context,
+                ).textTheme.bodyMedium?.color?.withOpacity(0.7),
+                size: 24,
+              ),
+              unselectedLabelTextStyle: TextStyle(
+                color: Theme.of(
+                  context,
+                ).textTheme.bodyMedium?.color?.withOpacity(0.7),
+                fontSize: 12,
+              ),
+              onDestinationSelected: (int index) {
+                setState(() {
+                  _selectedIndex = index;
+                });
+                if (index == 0) {
+                  _loadStats();
+                }
+              },
+              labelType: NavigationRailLabelType.all,
+              destinations: const [
+                NavigationRailDestination(
+                  icon: Icon(Icons.dashboard),
+                  label: Text('Dashboard'),
+                ),
+                NavigationRailDestination(
+                  icon: Icon(Icons.payment),
+                  label: Text('Verifikasi'),
+                ),
+                NavigationRailDestination(
+                  icon: Icon(Icons.people),
+                  label: Text('Users'),
+                ),
+                NavigationRailDestination(
+                  icon: Icon(Icons.confirmation_number),
+                  label: Text('Tickets'),
+                ),
+                NavigationRailDestination(
+                  icon: Icon(Icons.history),
+                  label: Text('History'),
+                ),
+              ],
             ),
-            destinations: const [
-              NavigationRailDestination(
-                icon: Icon(Icons.dashboard),
-                label: Text('Dashboard'),
-              ),
-              NavigationRailDestination(
-                icon: Icon(Icons.payment),
-                label: Text('Verifikasi'),
-              ),
-              NavigationRailDestination(
-                icon: Icon(Icons.people),
-                label: Text('Users'),
-              ),
-              NavigationRailDestination(
-                icon: Icon(Icons.confirmation_number),
-                label: Text('Tickets'),
-              ),
-            ],
           ),
           const VerticalDivider(thickness: 1, width: 1),
 
@@ -143,6 +175,8 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
         return const UserManagementScreen();
       case 3:
         return const TicketManagementScreen();
+      case 4:
+        return const BookingHistoryScreen();
       default:
         return _buildDashboardTab();
     }
@@ -162,7 +196,9 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
           children: [
             Text(
               'Dashboard Overview',
-              style: Theme.of(context).textTheme.headlineMedium,
+              style: Theme.of(
+                context,
+              ).textTheme.headlineMedium?.copyWith(fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 24),
 
@@ -172,8 +208,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
               shrinkWrap: true,
               mainAxisSpacing: 16,
               crossAxisSpacing: 16,
-              childAspectRatio:
-                  1.5, // Made cards taller to prevent bottom overflow
+              childAspectRatio: 1.1, // Reduced to make cards taller
               physics: const NeverScrollableScrollPhysics(),
               children: [
                 _buildStatCard(
@@ -257,41 +292,51 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
     IconData icon,
     Color color,
   ) {
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(AppConstants.paddingMedium),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Expanded(
-                  child: Text(
-                    title,
-                    style: Theme.of(context).textTheme.bodyMedium,
-                    overflow: TextOverflow.ellipsis,
-                    maxLines: 2,
-                  ),
+    return Container(
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: Theme.of(context).cardTheme.color,
+        borderRadius: BorderRadius.circular(AppConstants.radiusMedium),
+        border: Border.all(color: Theme.of(context).dividerColor, width: 1.5),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Container(
+            padding: const EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              gradient: LinearGradient(colors: [color, color.withOpacity(0.7)]),
+              borderRadius: BorderRadius.circular(8),
+              boxShadow: [
+                BoxShadow(
+                  color: color.withOpacity(0.3),
+                  blurRadius: 8,
+                  offset: const Offset(0, 2),
                 ),
-                const SizedBox(width: 8),
-                Icon(icon, color: color, size: 28),
               ],
             ),
-            const SizedBox(height: 8),
-            FittedBox(
-              fit: BoxFit.scaleDown,
-              child: Text(
-                value,
-                style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                  color: color,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
+            child: Icon(icon, color: Colors.white, size: 20),
+          ),
+          const SizedBox(height: 6),
+          Text(
+            title,
+            style: Theme.of(
+              context,
+            ).textTheme.bodySmall?.copyWith(fontWeight: FontWeight.w500),
+            overflow: TextOverflow.ellipsis,
+            maxLines: 2,
+          ),
+          FittedBox(
+            fit: BoxFit.scaleDown,
+            child: Text(
+              value,
+              style: Theme.of(
+                context,
+              ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }

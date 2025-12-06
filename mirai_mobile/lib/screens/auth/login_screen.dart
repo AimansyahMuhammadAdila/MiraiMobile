@@ -7,6 +7,7 @@ import 'package:mirai_mobile/screens/admin/admin_dashboard_screen.dart';
 import 'package:mirai_mobile/utils/constants.dart';
 import 'package:mirai_mobile/widgets/custom_button.dart';
 import 'package:mirai_mobile/widgets/custom_text_field.dart';
+import 'package:mirai_mobile/widgets/theme_toggle_button.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -68,7 +69,12 @@ class _LoginScreenState extends State<LoginScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                const SizedBox(height: 40),
+                // Theme Toggle Button at top-right
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: const [ThemeToggleButton()],
+                ),
+                const SizedBox(height: 20),
 
                 // Logo and Title
                 Icon(

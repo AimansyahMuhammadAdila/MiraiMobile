@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 // API Base URL Configuration
 class AppConstants {
   // API Configuration
- static const String apiBaseUrl = 'http://localhost:8080/api/v1';
+  static const String apiBaseUrl = 'http://localhost:8080/api/v1';
   // Storage Keys
   static const String tokenKey = 'auth_token';
   static const String userKey = 'user_data';
@@ -16,26 +16,31 @@ class AppConstants {
       'Festival cosplay tahunan terbesar di Indonesia yang menghadirkan '
       'guest stars, cosplay competition, live performance, dan berbagai aktivitas menarik!';
 
-  // App Colors - Japanese Pop Culture Inspired
-  static const Color primaryPurple = Color(0xFF9333EA);
-  static const Color primaryPink = Color(0xFFEC4899);
-  static const Color primaryCyan = Color(0xFF06B6D4);
-  static const Color accentOrange = Color(0xFFF59E0B);
+  // App Colors - New Brand Palette
+  static const Color primaryDarkPurple = Color(0xFF1E0359);
+  static const Color primaryPurple = Color(0xFF724EBF);
+  static const Color accentGold = Color(0xFFF2B807);
+  static const Color secondaryGold = Color(0xFFA67926);
+  static const Color lightGray = Color(0xFFF2F2F2);
 
-  static const Color backgroundDark = Color(0xFF0F172A);
-  static const Color cardDark = Color(0xFF1E293B);
-  static const Color textLight = Color(0xFFF8FAFC);
-  static const Color textGray = Color(0xFF94A3B8);
+  // Legacy compatibility
+  static const Color primaryPink = accentGold;
+  static const Color primaryCyan = accentGold;
+  static const Color accentOrange = secondaryGold;
+  static const Color backgroundDark = primaryDarkPurple;
+  static const Color cardDark = Color(0xFF2A0959);
+  static const Color textLight = lightGray;
+  static const Color textGray = Color(0xFFB8B8B8);
 
   // Gradient Colors
   static const LinearGradient primaryGradient = LinearGradient(
-    colors: [primaryPurple, primaryPink],
+    colors: [primaryPurple, primaryDarkPurple],
     begin: Alignment.topLeft,
     end: Alignment.bottomRight,
   );
 
   static const LinearGradient accentGradient = LinearGradient(
-    colors: [primaryCyan, primaryPurple],
+    colors: [accentGold, secondaryGold],
     begin: Alignment.topLeft,
     end: Alignment.bottomRight,
   );

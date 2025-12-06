@@ -61,6 +61,9 @@ $routes->group('api/v1', ['namespace' => 'App\Controllers\API\V1'], function ($r
         $routes->post('bookings/(:num)/approve', 'Admin\PaymentVerification::approve/$1');
         $routes->post('bookings/(:num)/reject', 'Admin\PaymentVerification::reject/$1');
 
+        // Booking History
+        $routes->get('bookings/history', 'Admin\BookingHistory::index');
+
         // User Management
         $routes->get('users', 'Admin\UserManagement::index');
         $routes->get('users/(:num)', 'Admin\UserManagement::show/$1');

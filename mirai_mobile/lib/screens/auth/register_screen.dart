@@ -4,6 +4,7 @@ import 'package:mirai_mobile/providers/auth_provider.dart';
 import 'package:mirai_mobile/utils/constants.dart';
 import 'package:mirai_mobile/widgets/custom_button.dart';
 import 'package:mirai_mobile/widgets/custom_text_field.dart';
+import 'package:mirai_mobile/widgets/theme_toggle_button.dart';
 
 class RegisterScreen extends StatefulWidget {
   const RegisterScreen({super.key});
@@ -56,7 +57,10 @@ class _RegisterScreenState extends State<RegisterScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Daftar Akun')),
+      appBar: AppBar(
+        title: const Text('Daftar Akun'),
+        actions: const [ThemeToggleButton()],
+      ),
       body: SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.all(AppConstants.paddingLarge),

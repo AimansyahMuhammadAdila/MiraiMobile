@@ -6,6 +6,7 @@ import 'package:mirai_mobile/screens/tickets/ticket_list_screen.dart';
 import 'package:mirai_mobile/screens/bookings/booking_history_screen.dart';
 import 'package:mirai_mobile/screens/profile/profile_screen.dart';
 import 'package:mirai_mobile/utils/constants.dart';
+import 'package:mirai_mobile/widgets/theme_toggle_button.dart';
 
 class DashboardScreen extends StatefulWidget {
   const DashboardScreen({super.key});
@@ -97,6 +98,12 @@ class DashboardHomeScreen extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
+                    // Theme toggle button
+                    const Align(
+                      alignment: Alignment.topRight,
+                      child: ThemeToggleButton(),
+                    ),
+                    const SizedBox(height: 8),
                     Text(
                       'Halo, ${authProvider.user?.name ?? "User"}!',
                       style: Theme.of(

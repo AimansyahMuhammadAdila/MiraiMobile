@@ -4,6 +4,7 @@ import 'package:mirai_mobile/providers/ticket_provider.dart';
 import 'package:mirai_mobile/screens/tickets/ticket_detail_screen.dart';
 import 'package:mirai_mobile/utils/constants.dart';
 import 'package:mirai_mobile/widgets/ticket_card.dart';
+import 'package:mirai_mobile/widgets/theme_toggle_button.dart';
 
 class TicketListScreen extends StatefulWidget {
   const TicketListScreen({super.key});
@@ -28,6 +29,7 @@ class _TicketListScreenState extends State<TicketListScreen> {
       appBar: AppBar(
         title: const Text('Pilih Tiket'),
         automaticallyImplyLeading: false,
+        actions: const [ThemeToggleButton()],
       ),
       body: Consumer<TicketProvider>(
         builder: (context, ticketProvider, _) {

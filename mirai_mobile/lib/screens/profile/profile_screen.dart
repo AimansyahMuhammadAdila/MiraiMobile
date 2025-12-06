@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:mirai_mobile/providers/auth_provider.dart';
 import 'package:mirai_mobile/screens/auth/login_screen.dart';
 import 'package:mirai_mobile/utils/constants.dart';
+import 'package:mirai_mobile/widgets/theme_toggle_button.dart';
 
 class ProfileScreen extends StatelessWidget {
   const ProfileScreen({super.key});
@@ -16,6 +17,7 @@ class ProfileScreen extends StatelessWidget {
       appBar: AppBar(
         title: const Text('Profil'),
         automaticallyImplyLeading: false,
+        actions: const [ThemeToggleButton()],
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(AppConstants.paddingLarge),

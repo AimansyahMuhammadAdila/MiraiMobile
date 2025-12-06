@@ -49,6 +49,15 @@ class StorageService {
     await _prefs?.remove(AppConstants.userKey);
   }
 
+  // Boolean Storage for Theme
+  bool? getBool(String key) {
+    return _prefs?.getBool(key);
+  }
+
+  Future<void> setBool(String key, bool value) async {
+    await _prefs?.setBool(key, value);
+  }
+
   // Clear All Data
   Future<void> clearAll() async {
     await _prefs?.clear();

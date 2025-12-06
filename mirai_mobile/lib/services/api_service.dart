@@ -367,4 +367,30 @@ class ApiService {
       rethrow;
     }
   }
+
+  // Booking History (Admin)
+
+  Future<ApiResponse> getBookingHistory({
+    int page = 1,
+    int perPage = 20,
+    String search = '',
+    String status = '',
+    String ticketTypeId = '',
+  }) async {
+    try {
+      final response = await _dio.get(
+        '/admin/bookings/history',
+        queryParameters: {
+          'page': page,
+          'per_page': perPage,
+          if (search.isNotEmpty) 'search': search,
+          if (status.isNotEmpty) 'status': status,
+          if (ticketTypeId.isNotEmpty) 'ticket_type_id': ticketTypeId,
+        },
+      );
+      return ApiResponse.fromJson(response.data);
+    } catch (e) {
+      rethrow;
+    }
+  }
 }

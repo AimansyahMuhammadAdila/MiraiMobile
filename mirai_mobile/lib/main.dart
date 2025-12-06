@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:mirai_mobile/providers/auth_provider.dart';
 import 'package:mirai_mobile/providers/booking_provider.dart';
 import 'package:mirai_mobile/providers/ticket_provider.dart';
+import 'package:mirai_mobile/providers/theme_provider.dart';
 import 'package:mirai_mobile/services/api_service.dart';
 import 'package:mirai_mobile/services/storage_service.dart';
 import 'package:mirai_mobile/utils/app_theme.dart';
@@ -25,15 +26,22 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MultiProvider(
       providers: [
+        ChangeNotifierProvider(create: (_) => ThemeProvider()),
         ChangeNotifierProvider(create: (_) => AuthProvider()),
         ChangeNotifierProvider(create: (_) => TicketProvider()),
         ChangeNotifierProvider(create: (_) => BookingProvider()),
       ],
-      child: MaterialApp(
-        title: 'MiraiMobile',
-        theme: AppTheme.darkTheme,
-        debugShowCheckedModeBanner: false,
-        home: const SplashScreen(),
+      child: Consumer<ThemeProvider>(
+        builder: (context, themeProvider, _) {
+          return MaterialApp(
+            title: 'MiraiMobile',
+            theme: themeProvider.isDarkMode
+                ? AppTheme.darkTheme
+                : AppTheme.lightTheme,
+            debugShowCheckedModeBanner: false,
+            home: const SplashScreen(),
+          );
+        },
       ),
     );
   }

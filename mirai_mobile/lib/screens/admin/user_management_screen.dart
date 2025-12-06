@@ -216,7 +216,6 @@ class _UserManagementScreenState extends State<UserManagementScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppConstants.backgroundDark,
       body: Padding(
         padding: const EdgeInsets.all(AppConstants.paddingLarge),
         child: Column(
@@ -238,7 +237,6 @@ class _UserManagementScreenState extends State<UserManagementScreen> {
                       hintText: 'Cari user...',
                       prefixIcon: const Icon(Icons.search),
                       filled: true,
-                      fillColor: Colors.grey[900],
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
                         borderSide: BorderSide.none,

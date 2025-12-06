@@ -5,6 +5,7 @@ import 'package:mirai_mobile/screens/bookings/ticket_screen.dart';
 import 'package:mirai_mobile/screens/bookings/payment_proof_upload_screen.dart';
 import 'package:mirai_mobile/screens/bookings/ticket_qr_screen.dart';
 import 'package:mirai_mobile/utils/constants.dart';
+import 'package:mirai_mobile/widgets/theme_toggle_button.dart';
 
 class BookingHistoryScreen extends StatefulWidget {
   const BookingHistoryScreen({super.key});
@@ -28,6 +29,7 @@ class _BookingHistoryScreenState extends State<BookingHistoryScreen> {
       appBar: AppBar(
         title: const Text('Riwayat Booking'),
         automaticallyImplyLeading: false,
+        actions: const [ThemeToggleButton()],
       ),
       body: Consumer<BookingProvider>(
         builder: (context, bookingProvider, _) {
