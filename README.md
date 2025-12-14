@@ -62,7 +62,12 @@
    JWT_SECRET_KEY = MiraiFest2025SecretKey!@#$%
    ```
 
-3. **Database sudah dibuat dan seeded** dengan 3 jenis tiket
+3. **Setup Database**
+   - Jalankan migrasi dan seeder:
+   ```bash
+   php spark migrate
+   php spark db:seed MainSeeder
+   ```
 
 4. **Start Server**
    ```bash
