@@ -1,15 +1,50 @@
 import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:mirai_mobile/models/booking_model.dart';
+import 'package:mirai_mobile/screens/bookings/payment_proof_upload_screen.dart';
+import 'package:mirai_mobile/services/api_service.dart';
 import 'package:mirai_mobile/utils/constants.dart';
 
-class TicketScreen extends StatelessWidget {
-  final BookingModel booking;
+class TicketScreen extends StatefulWidget {
+  final int bookingId;
 
-  const TicketScreen({super.key, required this.booking});
+  const TicketScreen({super.key, required this.bookingId});
+
+  @override
+  State<TicketScreen> createState() => _TicketScreenState();
+}
+
+class _TicketScreenState extends State<TicketScreen> {
+  BookingModel? booking;
+  bool isLoading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadBooking();
+  }
+
+  Future<void> _loadBooking() async {
+    try {
+      setState(() => isLoading = true);
+      booking = await ApiService().getBookingDetail(widget.bookingId);
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Gagal memuat booking: $e')),
+      );
+    } finally {
+      setState(() => isLoading = false);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
+    if (isLoading || booking == null) {
+      return const Scaffold(
+        body: Center(child: CircularProgressIndicator()),
+      );
+    }
+
     return Scaffold(
       appBar: AppBar(title: const Text('E-Ticket')),
       body: SingleChildScrollView(
@@ -22,36 +57,32 @@ class TicketScreen extends StatelessWidget {
               child: Container(
                 padding: const EdgeInsets.all(AppConstants.paddingLarge),
                 decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(
-                    AppConstants.radiusMedium,
-                  ),
+                  borderRadius: BorderRadius.circular(AppConstants.radiusMedium),
                   gradient: AppConstants.primaryGradient,
                 ),
                 child: Column(
                   children: [
-                    // Event Name
                     Text(
                       AppConstants.eventName,
-                      style: Theme.of(
-                        context,
-                      ).textTheme.displaySmall?.copyWith(color: Colors.white),
+                      style: Theme.of(context)
+                          .textTheme
+                          .displaySmall
+                          ?.copyWith(color: Colors.white),
                       textAlign: TextAlign.center,
                     ),
                     const SizedBox(height: 24),
 
-                    // QR Code or Bank Info
-                    if (booking.isConfirmed && booking.qrCode != null) ...[
+                    // QR Code or Status Info
+                    if (booking!.isConfirmed) ...[
                       Container(
                         padding: const EdgeInsets.all(16),
                         decoration: BoxDecoration(
                           color: Colors.white,
-                          borderRadius: BorderRadius.circular(
-                            AppConstants.radiusMedium,
-                          ),
+                          borderRadius: BorderRadius.circular(AppConstants.radiusMedium),
                         ),
                         child: CachedNetworkImage(
                           imageUrl:
-                              '${AppConstants.apiBaseUrl}/media/qr_codes/${booking.qrCode!.split('/').last}',
+                              '${AppConstants.apiBaseUrl}/api/v1/bookings/${booking!.id}/qr',
                           width: 250,
                           height: 250,
                           placeholder: (context, url) => const SizedBox(
@@ -69,62 +100,40 @@ class TicketScreen extends StatelessWidget {
                       const SizedBox(height: 16),
                       Text(
                         'Scan QR Code ini di pintu masuk',
-                        style: Theme.of(
-                          context,
-                        ).textTheme.bodySmall?.copyWith(color: Colors.white70),
+                        style: Theme.of(context)
+                            .textTheme
+                            .bodySmall
+                            ?.copyWith(color: Colors.white70),
                         textAlign: TextAlign.center,
                       ),
-                    ] else if (booking.isPending) ...[
+                    ] else if (booking!.isWaitingApproval || booking!.isPending) ...[
                       Container(
                         padding: const EdgeInsets.all(16),
                         decoration: BoxDecoration(
                           color: Colors.white,
-                          borderRadius: BorderRadius.circular(
-                            AppConstants.radiusMedium,
-                          ),
+                          borderRadius: BorderRadius.circular(AppConstants.radiusMedium),
                         ),
                         child: Column(
                           children: [
                             const Icon(
-                              Icons.account_balance,
+                              Icons.hourglass_top,
                               size: 48,
-                              color: AppConstants.primaryPurple,
+                              color: Colors.orange,
                             ),
                             const SizedBox(height: 16),
                             Text(
-                              'Silakan Transfer ke:',
-                              style: Theme.of(context).textTheme.bodyMedium,
+                              booking!.isPending
+                                  ? 'Bukti pembayaran bisa di-upload'
+                                  : 'Bukti pembayaran telah dikirim',
+                              style: const TextStyle(fontWeight: FontWeight.bold),
                             ),
-                            const SizedBox(height: 8),
-                            Text(
-                              'BCA 1234567890',
-                              style: Theme.of(context).textTheme.headlineSmall
-                                  ?.copyWith(
-                                    color: AppConstants.primaryPurple,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                            ),
-                            const SizedBox(height: 4),
-                            Text(
-                              'a.n. PT Mirai Mobile',
-                              style: Theme.of(context).textTheme.titleMedium,
-                            ),
-                            const SizedBox(height: 16),
-                            const Divider(),
-                            const SizedBox(height: 8),
-                            Text(
-                              'Total Pembayaran:',
-                              style: Theme.of(context).textTheme.bodyMedium,
-                            ),
-                            const SizedBox(height: 4),
-                            Text(
-                              booking.formattedPrice,
-                              style: Theme.of(context).textTheme.headlineSmall
-                                  ?.copyWith(
-                                    color: Colors.orange,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                            ),
+                            if (booking!.isWaitingApproval)
+                              const SizedBox(height: 8),
+                            if (booking!.isWaitingApproval)
+                              const Text(
+                                'Menunggu verifikasi dari admin',
+                                textAlign: TextAlign.center,
+                              ),
                           ],
                         ),
                       ),
@@ -142,43 +151,56 @@ class TicketScreen extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
-                      'Detail Booking',
-                      style: Theme.of(context).textTheme.titleLarge,
-                    ),
+                    Text('Detail Booking', style: Theme.of(context).textTheme.titleLarge),
                     const SizedBox(height: 16),
-
-                    _DetailRow(
-                      label: 'Booking Code',
-                      value: booking.bookingCode ?? 'N/A',
-                    ),
-                    _DetailRow(
-                      label: 'Jenis Tiket',
-                      value: booking.ticketTypeName ?? '-',
-                    ),
-                    _DetailRow(
-                      label: 'Jumlah',
-                      value: '${booking.quantity}x Tiket',
-                    ),
-                    _DetailRow(
-                      label: 'Total Harga',
-                      value: booking.formattedPrice,
-                      valueColor: AppConstants.primaryPurple,
-                    ),
+                    _DetailRow(label: 'Booking Code', value: booking!.bookingCode ?? 'N/A'),
+                    _DetailRow(label: 'Jenis Tiket', value: booking!.ticketTypeName ?? '-'),
+                    _DetailRow(label: 'Jumlah', value: '${booking!.quantity}x Tiket'),
+                    _DetailRow(label: 'Total Harga', value: booking!.formattedPrice, valueColor: AppConstants.primaryPurple),
                     _DetailRow(
                       label: 'Status Pembayaran',
-                      value: booking.statusText,
-                      valueColor: booking.isConfirmed
+                      value: booking!.statusText,
+                      valueColor: booking!.isConfirmed
                           ? Colors.green
-                          : booking.isPending
-                          ? Colors.orange
-                          : Colors.red,
+                          : booking!.isPending
+                              ? Colors.orange
+                              : Colors.red,
                     ),
                   ],
                 ),
               ),
             ),
             const SizedBox(height: 24),
+
+            // Upload Payment Proof Button
+            if (booking!.canUpload) ...[
+              ElevatedButton(
+                onPressed: () async {
+                  final result = await Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => PaymentProofUploadScreen(
+                        bookingId: booking!.id,
+                        bookingCode: booking!.bookingCode!,
+                      ),
+                    ),
+                  );
+
+                  if (result == true) {
+                    await _loadBooking(); // 🔹 Refresh booking data otomatis
+                  }
+                },
+                style: ElevatedButton.styleFrom(
+                  padding: const EdgeInsets.symmetric(vertical: 16),
+                ),
+                child: const Text('Upload Bukti Pembayaran'),
+              ),
+            ] else if (booking!.isWaitingApproval) ...[
+              ElevatedButton(
+                onPressed: null,
+                child: const Text('Menunggu Verifikasi Admin'),
+              ),
+            ],
 
             // Instructions
             Container(
@@ -196,8 +218,7 @@ class TicketScreen extends StatelessWidget {
                       const SizedBox(width: 8),
                       Text(
                         'Petunjuk',
-                        style: Theme.of(context).textTheme.titleMedium
-                            ?.copyWith(color: AppConstants.primaryCyan),
+                        style: Theme.of(context).textTheme.titleMedium?.copyWith(color: AppConstants.primaryCyan),
                       ),
                     ],
                   ),
@@ -233,18 +254,15 @@ class _DetailRow extends StatelessWidget {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Expanded(
-            flex: 2,
-            child: Text(label, style: Theme.of(context).textTheme.bodyMedium),
-          ),
+          Expanded(flex: 2, child: Text(label, style: Theme.of(context).textTheme.bodyMedium)),
           Expanded(
             flex: 3,
             child: Text(
               value,
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                fontWeight: FontWeight.bold,
-                color: valueColor,
-              ),
+                    fontWeight: FontWeight.bold,
+                    color: valueColor,
+                  ),
               textAlign: TextAlign.right,
             ),
           ),

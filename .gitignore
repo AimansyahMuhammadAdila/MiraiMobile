@@ -54,3 +54,8 @@ Thumbs.db
 /tests/_support/_generated
 /build
 /phpunit.xml
+
+#--------------------------------------------------------------------
+# Google Cloud Service Account Keys
+#--------------------------------------------------------------------
+/app/Config/gcs-key.json

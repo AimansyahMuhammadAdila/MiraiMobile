@@ -56,7 +56,7 @@ class AdminFilter implements FilterInterface
             }
 
             // Store user ID in request for later use
-            $request->user_id = $userId;
+            // $request->user_id = $userId;
 
         } catch (\Exception $e) {
             return service('response')

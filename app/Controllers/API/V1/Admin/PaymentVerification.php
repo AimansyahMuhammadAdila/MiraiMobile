@@ -5,6 +5,12 @@ namespace App\Controllers\API\V1\Admin;
 use App\Controllers\BaseController;
 use App\Models\BookingModel;
 use App\Models\UserModel;
+use BaconQrCode\Common\ErrorCorrectionLevel;
+use Endroid\QrCode\Builder\Builder;
+use Endroid\QrCode\Writer\PngWriter;
+use Endroid\QrCode\Encoding\Encoding;
+use Endroid\QrCode\ErrorCorrectionLevel\ErrorCorrectionLevelHigh;
+use App\Libraries\GcsService;
 
 class PaymentVerification extends BaseController
 {
@@ -38,7 +44,7 @@ class PaymentVerification extends BaseController
             foreach ($pendingBookings as &$booking) {
                 if (!empty($booking['payment_proof'])) {
                     // Use Media controller to serve image with CORS headers
-                    $booking['payment_proof_url'] = base_url('api/v1/media/payment_proofs/' . basename($booking['payment_proof']));
+                    $booking['payment_proof_url'] = $booking['payment_proof'];
                 }
             }
 
@@ -82,18 +88,27 @@ class PaymentVerification extends BaseController
                 ])->setStatusCode(404);
             }
 
+            if ($booking['payment_status'] === 'confirmed') {
+                return $this->response->setJSON([
+                    'success' => false,
+                    'message' => 'Booking sudah dikonfirmasi',
+                ])->setStatusCode(400);
+            }
+
             // Generate QR Code
             $qrCodePath = $this->generateQRCode($booking);
 
-            // Update payment status to confirmed and add QR code
-            $updated = $this->bookingModel->update($id, [
+            if (!$qrCodePath) {
+                return $this->response->setJSON([
+                    'success' => false,
+                    'message' => 'Gagal mengupload QR Code, coba lagi.',
+                ])->setStatusCode(500);
+            }
+
+            $this->bookingModel->update($id, [
                 'payment_status' => 'confirmed',
                 'qr_code' => $qrCodePath,
             ]);
-
-            if (!$updated) {
-                throw new \Exception('Gagal meng-approve booking');
-            }
 
             // Get updated booking data with user and ticket info
             $updatedBooking = $this->bookingModel
@@ -102,7 +117,7 @@ class PaymentVerification extends BaseController
                 ->join('ticket_types', 'ticket_types.id = bookings.ticket_type_id')
                 ->find($id);
 
-            $updatedBooking['qr_code_url'] = base_url($qrCodePath);
+            $updatedBooking['qr_code_url'] = $qrCodePath;
 
             return $this->response->setJSON([
                 'success' => true,
@@ -124,14 +139,12 @@ class PaymentVerification extends BaseController
      */
     private function generateQRCode($booking)
     {
-        // Get ticket and user info
         $ticketModel = new \App\Models\TicketTypeModel();
         $userModel = new \App\Models\UserModel();
 
         $ticket = $ticketModel->find($booking['ticket_type_id']);
         $user = $userModel->find($booking['user_id']);
 
-        // Prepare QR code data
         $qrData = json_encode([
             'booking_code' => $booking['booking_code'],
             'ticket_type' => $ticket['name'],
@@ -141,26 +154,41 @@ class PaymentVerification extends BaseController
             'total_price' => $booking['total_price'],
             'verified_at' => date('Y-m-d H:i:s'),
         ]);
+        $tmpDir = sys_get_temp_dir(); // cross-platform
+        $tempPath = $tmpDir . DIRECTORY_SEPARATOR . $booking['booking_code'] . '.png';
+        if (!is_dir($tmpDir)) {
+            mkdir($tmpDir, 0777, true);
+        }
+        $tempPath = $tmpDir . '/' . $booking['booking_code'] . '.png';
 
-        // Generate QR Code using endroid/qr-code
-        $qrCode = (new \Endroid\QrCode\Builder\Builder(
-            data: $qrData,
-            size: 300,
-            margin: 10
-        ))->build();
+        try {
+            $result = new Builder(
+                writer: new PngWriter(),
+                data: $qrData,
+                encoding: new Encoding('UTF-8'),
+                errorCorrectionLevel: ErrorCorrectionLevel::High,
+                size: 300,
+                margin: 10
+            );
 
-        // Save QR code to file
-        $qrCodeDir = FCPATH . 'uploads/qr_codes';
-        if (!is_dir($qrCodeDir)) {
-            mkdir($qrCodeDir, 0777, true);
+            // simpan ke file
+            $result->saveToFile($tempPath);
+
+
+            $gcs = new GcsService();
+            $qrUrl = $gcs->uploadQrCode(
+                $tempPath,
+                $booking['booking_code'] . '.png'
+            );
+
+            unlink($tempPath);
+
+            return $qrUrl;
+        } catch (\Exception $e) {
+            log_message('error', 'QR Code error: ' . $e->getMessage());
+            return null;
         }
 
-        $fileName = $booking['booking_code'] . '.png';
-        $filePath = $qrCodeDir . '/' . $fileName;
-
-        $qrCode->saveToFile($filePath);
-
-        return 'uploads/qr_codes/' . $fileName;
     }
 
     /**

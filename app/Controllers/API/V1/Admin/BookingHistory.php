@@ -65,7 +65,7 @@ class BookingHistory extends BaseController
             // Format payment proof and QR code URLs
             foreach ($bookings as &$booking) {
                 if (!empty($booking['payment_proof'])) {
-                    $booking['payment_proof_url'] = base_url($booking['payment_proof']);
+                    $booking['payment_proof_url'] = $booking['payment_proof'];
                 } else {
                     $booking['payment_proof_url'] = null;
                 }

@@ -102,7 +102,7 @@ class _BookingHistoryScreenState extends State<BookingHistoryScreen> {
                     onTap: () {
                       Navigator.of(context).push(
                         MaterialPageRoute(
-                          builder: (_) => TicketScreen(booking: booking),
+                          builder: (_) => TicketScreen(bookingId: booking.id),
                         ),
                       );
                     },
@@ -233,7 +233,7 @@ class _BookingHistoryScreenState extends State<BookingHistoryScreen> {
                                   Navigator.of(context).push(
                                     MaterialPageRoute(
                                       builder: (_) =>
-                                          TicketScreen(booking: booking),
+                                          TicketScreen(bookingId: booking.id),
                                     ),
                                   );
                                 },

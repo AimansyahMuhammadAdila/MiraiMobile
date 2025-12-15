@@ -6,6 +6,7 @@ use App\Controllers\BaseController;
 use App\Models\BookingModel;
 use App\Models\TicketTypeModel;
 use CodeIgniter\HTTP\ResponseInterface;
+use App\Libraries\GcsService;
 
 class Booking extends BaseController
 {
@@ -227,7 +228,6 @@ class Booking extends BaseController
     public function uploadProof($id = null)
     {
         try {
-            // Get authenticated user
             $userId = getCurrentUserId();
             if (!$userId) {
                 return $this->response->setJSON([
@@ -236,7 +236,6 @@ class Booking extends BaseController
                 ])->setStatusCode(401);
             }
 
-            // Validate booking exists and belongs to user
             $booking = $this->bookingModel->find($id);
             if (!$booking) {
                 return $this->response->setJSON([
@@ -245,78 +244,60 @@ class Booking extends BaseController
                 ])->setStatusCode(404);
             }
 
-            if ($booking['user_id'] != $userId) {
-                return $this->response->setJSON([
-                    'success' => false,
-                    'message' => 'Anda tidak memiliki akses ke booking ini',
-                ])->setStatusCode(403);
-            }
-
-            // Validate file upload
             $file = $this->request->getFile('payment_proof');
-            if (!$file) {
+            if (!$file || !$file->isValid()) {
                 return $this->response->setJSON([
                     'success' => false,
-                    'message' => 'File bukti pembayaran harus diupload',
+                    'message' => $file ? $file->getErrorString() : 'File tidak ada',
                 ])->setStatusCode(400);
             }
 
-            // Validate file type and size
-            $validTypes = ['image/jpeg', 'image/jpg', 'image/png'];
-            if (!in_array($file->getMimeType(), $validTypes)) {
+            $allowed = ['image/jpeg', 'image/png', 'image/jpg'];
+            if (!in_array($file->getMimeType(), $allowed)) {
                 return $this->response->setJSON([
                     'success' => false,
-                    'message' => 'File harus berupa gambar (JPG, JPEG, atau PNG)',
+                    'message' => 'File harus gambar JPG / PNG',
                 ])->setStatusCode(400);
             }
 
-            // Max 5MB
             if ($file->getSize() > 5 * 1024 * 1024) {
                 return $this->response->setJSON([
                     'success' => false,
-                    'message' => 'Ukuran file maksimal 5MB',
+                    'message' => 'Ukuran maksimal 5MB',
                 ])->setStatusCode(400);
             }
 
-            if (!$file->isValid()) {
-                return $this->response->setJSON([
-                    'success' => false,
-                    'message' => 'File tidak valid: ' . $file->getErrorString(),
-                ])->setStatusCode(400);
-            }
+            $newName = 'booking_' . $id . '_' . time() . '.' . $file->getExtension();
 
-            // Generate unique filename
-            $newName = $id . '_' . time() . '.' . $file->getExtension();
+            $gcs = new GcsService();
+            $imageUrl = $gcs->uploadPaymentProof(
+                $file->getTempName(),
+                $newName
+            );
 
-            // Move file to uploads directory
-            $uploadPath = FCPATH . 'uploads/payment_proofs';
-            if (!is_dir($uploadPath)) {
-                mkdir($uploadPath, 0777, true);
-            }
-
-            $file->move($uploadPath, $newName);
-
-            // Update booking with payment proof path
-            $proofPath = 'uploads/payment_proofs/' . $newName;
             $this->bookingModel->update($id, [
-                'payment_proof' => $proofPath,
+                'payment_proof' => $imageUrl,
+                'payment_status' => 'pending',
+                'updated_at' => date('Y-m-d H:i:s')
             ]);
 
             return $this->response->setJSON([
                 'success' => true,
-                'message' => 'Bukti pembayaran berhasil diupload',
+                'message' => 'Bukti pembayaran berhasil diupload. Menunggu verifikasi.',
                 'data' => [
-                    'booking_id' => $id,
-                    'payment_proof' => base_url($proofPath),
+                    'payment_proof' => $imageUrl,
+                    'payment_status' => 'pending',
                 ],
-            ])->setStatusCode(200);
+            ]);
 
-        } catch (\Exception $e) {
-            log_message('error', 'Upload proof error: ' . $e->getMessage());
+        } catch (\Throwable $e) {
+            log_message('error', 'UPLOAD GCS ERROR: ' . $e->getMessage());
+
             return $this->response->setJSON([
                 'success' => false,
-                'message' => 'Terjadi kesalahan saat upload: ' . $e->getMessage(),
+                'message' => $e->getMessage(),
             ])->setStatusCode(500);
         }
     }
+
 }

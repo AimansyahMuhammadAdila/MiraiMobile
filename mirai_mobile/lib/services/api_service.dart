@@ -286,6 +286,7 @@ class ApiService {
       final response = await _dio.post(
         '/bookings/$bookingId/upload-proof',
         data: formData,
+        options: Options(headers: {'Content-Type': 'multipart/form-data'}),
       );
 
       return ApiResponse.fromJson(response.data);

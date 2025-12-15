@@ -29,49 +29,43 @@ class BookingModel {
 
   factory BookingModel.fromJson(Map<String, dynamic> json) {
     return BookingModel(
-      id: json['id'] is String ? int.parse(json['id']) : json['id'] as int,
+      id: json['id'] is String ? int.parse(json['id']) : json['id'],
       userId: json['user_id'] is String
           ? int.parse(json['user_id'])
-          : json['user_id'] as int,
+          : json['user_id'],
       ticketTypeId: json['ticket_type_id'] is String
           ? int.parse(json['ticket_type_id'])
-          : json['ticket_type_id'] as int,
-      ticketTypeName: json['ticket_type_name'] as String?,
+          : json['ticket_type_id'],
+      ticketTypeName: json['ticket_type_name'],
       quantity: json['quantity'] is String
           ? int.parse(json['quantity'])
-          : json['quantity'] as int,
+          : json['quantity'],
       totalPrice: json['total_price'] is String
           ? double.parse(json['total_price'])
           : (json['total_price'] as num).toDouble(),
-      qrCode: json['qr_code'] as String?,
-      bookingCode: json['booking_code'] as String?,
-      paymentProof: json['payment_proof'] as String?,
-      paymentStatus: json['payment_status'] as String? ?? 'pending',
-      createdAt: json['created_at'] as String?,
-      updatedAt: json['updated_at'] as String?,
+      qrCode: json['qr_code'],
+      bookingCode: json['booking_code'],
+      paymentProof: json['payment_proof'],
+      paymentStatus: json['payment_status'] ?? 'unpaid',
+      createdAt: json['created_at'],
+      updatedAt: json['updated_at'],
     );
   }
 
-  Map<String, dynamic> toJson() {
-    return {
-      'id': id,
-      'user_id': userId,
-      'ticket_type_id': ticketTypeId,
-      'ticket_type_name': ticketTypeName,
-      'quantity': quantity,
-      'total_price': totalPrice,
-      'qr_code': qrCode,
-      'booking_code': bookingCode,
-      'payment_proof': paymentProof,
-      'payment_status': paymentStatus,
-      'created_at': createdAt,
-      'updated_at': updatedAt,
-    };
-  }
+  // =============================
+  // STATUS GETTER (PENTING)
+  // =============================
 
-  String get formattedPrice {
-    return 'Rp ${totalPrice.toStringAsFixed(0).replaceAllMapped(RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'), (Match m) => '${m[1]}.')}';
-  }
+  bool get isUnpaid => paymentStatus == 'unpaid';
+  bool get isPending => paymentStatus == 'pending';
+  bool get isWaitingApproval => paymentStatus == 'waiting_approval';
+  bool get isConfirmed => paymentStatus == 'confirmed';
+  bool get canUpload => paymentStatus == 'unpaid' || paymentStatus == 'pending';
+  bool get isCancelled => paymentStatus == 'cancelled';
+
+  // =============================
+  // STATUS TEXT (UI)
+  // =============================
 
   String get statusText {
     switch (paymentStatus) {
@@ -79,6 +73,8 @@ class BookingModel {
         return 'Confirmed';
       case 'pending':
         return 'Menunggu Pembayaran';
+      case 'waiting_approval':
+        return 'Menunggu Verifikasi Admin';
       case 'cancelled':
         return 'Dibatalkan';
       default:
@@ -86,7 +82,7 @@ class BookingModel {
     }
   }
 
-  bool get isPending => paymentStatus == 'pending';
-  bool get isConfirmed => paymentStatus == 'confirmed';
-  bool get isCancelled => paymentStatus == 'cancelled';
+  String get formattedPrice {
+    return 'Rp ${totalPrice.toStringAsFixed(0).replaceAllMapped(RegExp(r'(\\d{1,3})(?=(\\d{3})+(?!\\d))'), (m) => '${m[1]}.')}';
+  }
 }

@@ -13,7 +13,6 @@ $routes->get('/', 'Home::index');
  * --------------------------------------------------------------------
  */
 $routes->group('api/v1', ['namespace' => 'App\Controllers\API\V1'], function ($routes) {
-
     // Handle all OPTIONS requests for CORS preflight
     $routes->options('(:any)', function () {
         return service('response')
@@ -31,6 +30,7 @@ $routes->group('api/v1', ['namespace' => 'App\Controllers\API\V1'], function ($r
     $routes->post('auth/login', 'Auth::login');
     $routes->get('tickets', 'Tickets::index');
     $routes->get('tickets/(:num)', 'Tickets::show/$1');
+
 
     // Protected Routes - Requires JWT Authentication
     $routes->group('', ['filter' => 'auth'], function ($routes) {
