@@ -5,11 +5,10 @@ namespace App\Controllers\API\V1\Admin;
 use App\Controllers\BaseController;
 use App\Models\BookingModel;
 use App\Models\UserModel;
-use BaconQrCode\Common\ErrorCorrectionLevel;
 use Endroid\QrCode\Builder\Builder;
-use Endroid\QrCode\Writer\PngWriter;
 use Endroid\QrCode\Encoding\Encoding;
-use Endroid\QrCode\ErrorCorrectionLevel\ErrorCorrectionLevelHigh;
+use Endroid\QrCode\ErrorCorrectionLevel;
+use Endroid\QrCode\Writer\PngWriter;
 use App\Libraries\GcsService;
 
 class PaymentVerification extends BaseController
@@ -168,12 +167,14 @@ class PaymentVerification extends BaseController
                 encoding: new Encoding('UTF-8'),
                 errorCorrectionLevel: ErrorCorrectionLevel::High,
                 size: 300,
-                margin: 10
+                margin: 10,
             );
 
-            // simpan ke file
-            $result->saveToFile($tempPath);
+            // Build the QR code
+            $qrResult = $result->build();
 
+            // Save it to a file
+            $qrResult->saveToFile($tempPath);
 
             $gcs = new GcsService();
             $qrUrl = $gcs->uploadQrCode(
