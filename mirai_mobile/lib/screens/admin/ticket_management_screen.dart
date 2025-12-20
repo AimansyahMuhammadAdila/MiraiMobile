@@ -254,7 +254,7 @@ class _TicketManagementScreenState extends State<TicketManagementScreen> {
             // Add new ticket button
             return Card(
               margin: const EdgeInsets.only(bottom: AppConstants.paddingMedium),
-              color: AppConstants.primaryPurple.withOpacity(0.1),
+              color: Theme.of(context).colorScheme.primary.withOpacity(0.15),
               child: InkWell(
                 onTap: () => _showTicketDialog(),
                 child: Padding(
@@ -262,9 +262,9 @@ class _TicketManagementScreenState extends State<TicketManagementScreen> {
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      const Icon(
+                      Icon(
                         Icons.add_circle_outline,
-                        color: AppConstants.primaryPurple,
+                        color: Theme.of(context).colorScheme.primary,
                         size: 32,
                       ),
                       const SizedBox(width: 12),
@@ -272,7 +272,7 @@ class _TicketManagementScreenState extends State<TicketManagementScreen> {
                         'Tambah Tipe Tiket Baru',
                         style: Theme.of(context).textTheme.titleMedium
                             ?.copyWith(
-                              color: AppConstants.primaryPurple,
+                              color: Theme.of(context).colorScheme.primary,
                               fontWeight: FontWeight.bold,
                             ),
                       ),
@@ -342,9 +342,7 @@ class _TicketManagementScreenState extends State<TicketManagementScreen> {
                     const SizedBox(height: 8),
                     Text(
                       ticket.description!,
-                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                        color: AppConstants.textGray,
-                      ),
+                      style: Theme.of(context).textTheme.bodyMedium,
                     ),
                   ],
                   const Divider(height: 24),

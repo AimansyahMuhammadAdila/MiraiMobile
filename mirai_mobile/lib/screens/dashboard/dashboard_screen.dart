@@ -141,7 +141,7 @@ class DashboardHomeScreen extends StatelessWidget {
                         ),
                         child: Column(
                           children: [
-                            Icon(Icons.festival, size: 60, color: Colors.white),
+                            Icon(Icons.home, size: 60, color: Colors.white),
                             const SizedBox(height: 16),
                             Text(
                               AppConstants.eventName,

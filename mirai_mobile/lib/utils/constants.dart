@@ -11,7 +11,7 @@ class AppConstants {
   // MiraiFest Event Details
   static const String eventName = 'MiraiFest 2025';
   static const String eventLocation = 'Gedung Serbaguna ULM Banjarbaru';
-  static final DateTime eventDate = DateTime(2025, 12, 13);
+  static final DateTime eventDate = DateTime(2025, 12, 20);
   static const String eventDescription =
       'Festival cosplay tahunan terbesar di Indonesia yang menghadirkan '
       'guest stars, cosplay competition, live performance, dan berbagai aktivitas menarik!';

@@ -209,16 +209,49 @@ class UserManagement extends BaseController
                 ])->setStatusCode(404);
             }
 
+            // Start database transaction
+            $db = \Config\Database::connect();
+            $db->transStart();
+
+            // Get all user bookings before deletion
+            $bookingModel = new \App\Models\BookingModel();
+            $ticketTypeModel = new \App\Models\TicketTypeModel();
+            $userBookings = $bookingModel->getUserBookings($id);
+
+            // Restore ticket quota for each booking
+            foreach ($userBookings as $booking) {
+                // Only restore quota for pending and confirmed bookings
+                // Cancelled bookings should have already had their quota restored
+                if (in_array($booking['payment_status'], ['pending', 'confirmed'])) {
+                    $ticketTypeModel->restoreQuota(
+                        $booking['ticket_type_id'],
+                        $booking['quantity']
+                    );
+                }
+            }
+
+            // Delete user (this will cascade delete bookings due to foreign key)
             $deleted = $this->userModel->delete($id);
 
             if (!$deleted) {
+                $db->transRollback();
                 throw new \Exception('Gagal menghapus user');
+            }
+
+            // Commit transaction
+            $db->transComplete();
+
+            if ($db->transStatus() === false) {
+                throw new \Exception('Transaksi database gagal');
             }
 
             return $this->response->setJSON([
                 'success' => true,
                 'message' => 'User berhasil dihapus',
-                'data' => ['id' => $id],
+                'data' => [
+                    'id' => $id,
+                    'restored_bookings' => count($userBookings),
+                ],
             ])->setStatusCode(200);
 
         } catch (\Exception $e) {

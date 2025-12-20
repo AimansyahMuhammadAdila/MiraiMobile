@@ -65,13 +65,15 @@ class BookingHistory extends BaseController
             // Format payment proof and QR code URLs
             foreach ($bookings as &$booking) {
                 if (!empty($booking['payment_proof'])) {
-                    $booking['payment_proof_url'] = base_url($booking['payment_proof']);
+                    // Use Media controller to serve image with CORS headers
+                    $booking['payment_proof_url'] = base_url('api/v1/media/payment_proofs/' . basename($booking['payment_proof']));
                 } else {
                     $booking['payment_proof_url'] = null;
                 }
 
                 if (!empty($booking['qr_code'])) {
-                    $booking['qr_code_url'] = base_url($booking['qr_code']);
+                    // Use Media controller for QR codes too
+                    $booking['qr_code_url'] = base_url('api/v1/media/qr_codes/' . basename($booking['qr_code']));
                 } else {
                     $booking['qr_code_url'] = null;
                 }

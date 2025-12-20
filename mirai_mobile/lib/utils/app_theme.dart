@@ -7,7 +7,7 @@ class AppTheme {
     return ThemeData(
       useMaterial3: true,
       brightness: Brightness.dark,
-      scaffoldBackgroundColor: AppConstants.backgroundDark,
+      scaffoldBackgroundColor: const Color.fromARGB(255, 77, 26, 187),
 
       // Color Scheme
       colorScheme: ColorScheme.dark(
